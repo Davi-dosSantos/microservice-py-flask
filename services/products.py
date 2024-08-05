@@ -48,8 +48,10 @@ if __name__ == "__main__":
 
 BASE_URL = "https://dummyjson.com"
 @app.route('/products', methods=['GET'])
-def get_products():
-    response = requests.get(f"{BASE_URL}/products")
+@token_required
+def get_products(current_user_id):
+    headers = {'Authorization': f'Bearer {request.cookies.get("token")}'}    
+    response = requests.get(f"{BASE_URL}/products", headers=headers)
     if response.status_code != 200:
         return jsonify({'error': response.json()['message']}), response.status_code
     products = []
@@ -63,5 +65,7 @@ def get_products():
         }
         products.append(product_data)
     return jsonify({'data': products}), 200 if products else 204
+
+
 
 app.config['SECRET_KEY'] = os.urandom(24)
